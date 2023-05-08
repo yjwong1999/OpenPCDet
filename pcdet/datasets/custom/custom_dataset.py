@@ -65,7 +65,7 @@ class CustomDataset(DatasetTemplate):
     def get_lidar(self, idx):
         lidar_file = self.root_path / 'points' / ('%s.npy' % idx)
         assert lidar_file.exists()
-        point_features = np.load(lidar_file)
+        point_features = np.load(lidar_file, allow_pickle=True)
         return point_features
 
     def set_split(self, split):
@@ -277,7 +277,7 @@ if __name__ == '__main__':
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         create_custom_infos(
             dataset_cfg=dataset_cfg,
-            class_names=['Vehicle', 'Pedestrian', 'Cyclist'],
+            class_names=['pass', 'fail'],
             data_path=ROOT_DIR / 'data' / 'custom',
             save_path=ROOT_DIR / 'data' / 'custom',
         )
