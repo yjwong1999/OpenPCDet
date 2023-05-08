@@ -1,12 +1,13 @@
 DATASET: 'CustomDataset'
 DATA_PATH: '../data/custom'
 
-POINT_CLOUD_RANGE: [-75.2, -75.2, -2, 75.2, 75.2, 4]
+POINT_CLOUD_RANGE: [-36.8, -24.0, -42.0, 36.8, 24.0, 42.0]
+
+CLASS_NAMES: ['pass', 'fail']  
 
 MAP_CLASS_TO_KITTI: {
-    'Vehicle': 'Car',
-    'Pedestrian': 'Pedestrian',
-    'Cyclist': 'Cyclist',
+    'pass': 'Car',
+    'fail': 'Pedestrian',
 }
 
 DATA_SPLIT: {
@@ -33,10 +34,10 @@ DATA_AUGMENTOR:
           DB_INFO_PATH:
               - custom_dbinfos_train.pkl
           PREPARE: {
-             filter_by_min_points: ['Vehicle:5', 'Pedestrian:5', 'Cyclist:5'],
+             filter_by_min_points: ['pass:5', 'fail:5'],
           }
 
-          SAMPLE_GROUPS: ['Vehicle:20', 'Pedestrian:15', 'Cyclist:15']
+          SAMPLE_GROUPS: ['pass:15', 'fail:20']
           NUM_POINT_FEATURES: 4
           DATABASE_WITH_FAKELIDAR: False
           REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
@@ -46,7 +47,7 @@ DATA_AUGMENTOR:
           ALONG_AXIS_LIST: ['x', 'y']
 
         - NAME: random_world_rotation
-          WORLD_ROT_ANGLE: [-0.78539816, 0.78539816]
+          WORLD_ROT_ANGLE: [-0.05, 0.05] #[-0.78539816, 0.78539816]
 
         - NAME: random_world_scaling
           WORLD_SCALE_RANGE: [0.95, 1.05]
