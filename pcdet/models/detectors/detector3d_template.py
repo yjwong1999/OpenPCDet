@@ -382,6 +382,77 @@ class Detector3DTemplate(nn.Module):
                 logger.info('Not updated weight %s: %s' % (key, str(state_dict[key].shape)))
 
         logger.info('==> Done (loaded %d/%d)' % (len(update_model_state), len(state_dict)))
+        
+    def reptile(self, filenames, logger, to_cpu=False, pre_trained_path=None):
+        model_state_disks = []
+        for filename in filenames:
+            if not os.path.isfile(filename):
+                raise FileNotFoundError
+
+            logger.info('==> Loading parameters from checkpoint %s to %s' % (filename, 'CPU' if to_cpu else 'GPU'))
+            loc_type = torch.device('cpu') if to_cpu else None
+            checkpoint = torch.load(filename, map_location=loc_type)
+            model_state_disk = checkpoint['model_state']
+            if not pre_trained_path is None:
+                pretrain_checkpoint = torch.load(pre_trained_path, map_location=loc_type)
+                pretrain_model_state_disk = pretrain_checkpoint['model_state']
+                model_state_disk.update(pretrain_model_state_disk)
+                
+            version = checkpoint.get("version", None)
+            if version is not None:
+                logger.info('==> Checkpoint trained from version: %s' % version)
+    
+            model_state_disks.append(model_state_disk)
+        
+        # reptile
+        strict = False
+        state_dict = self.state_dict()  # local cache of state_dict
+        spconv_keys = find_all_spconv_keys(self)
+
+        update_model_state = {}
+        # for key, val in model_state_disk.items():
+        for i, (key, val) in enumerate(model_state_disks[-1].items()):
+            vals = []
+            
+            # not sure what, but yup
+            if key in spconv_keys and key in state_dict and state_dict[key].shape != val.shape:
+                # with different spconv versions, we need to adapt weight shapes for spconv blocks
+                # adapt spconv weights from version 1.x to version 2.x if you used weights from spconv 1.x
+                
+                # process val corresponding to current key for all models
+                for j in range(len(model_state_disks)):
+                    val = model_state_disks[j][key]
+
+                    val_native = val.transpose(-1, -2)  # (k1, k2, k3, c_in, c_out) to (k1, k2, k3, c_out, c_in)
+                    if val_native.shape == state_dict[key].shape:
+                        val = val_native.contiguous()
+                    else:
+                        assert val.shape.__len__() == 5, 'currently only spconv 3D is supported'
+                        val_implicit = val.permute(4, 0, 1, 2, 3)  # (k1, k2, k3, c_in, c_out) to (c_out, k1, k2, k3, c_in)
+                        if val_implicit.shape == state_dict[key].shape:
+                            val = val_implicit.contiguous()
+                    # keep the val
+                    vals.append(val)
+            else:
+                for j in range(len(model_state_disks)):
+                    val = model_state_disks[j][key]  
+                    # keep the val
+                    vals.append(val)
+            
+            # reptile here
+            val = torch.stack(vals, dim=0).sum(dim=0).sum(dim=0) / len(model_state_disks)
+
+            if key in state_dict and state_dict[key].shape == val.shape:
+                update_model_state[key] = val
+                # logger.info('Update weight %s: %s' % (key, str(val.shape)))
+
+        if strict:
+            self.load_state_dict(update_model_state)
+        else:
+            state_dict.update(update_model_state)
+            self.load_state_dict(state_dict)
+        return state_dict, update_model_state
+
 
     def load_params_with_optimizer(self, filename, to_cpu=False, optimizer=None, logger=None):
         if not os.path.isfile(filename):
