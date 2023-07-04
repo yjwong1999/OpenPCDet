@@ -383,7 +383,7 @@ class Detector3DTemplate(nn.Module):
 
         logger.info('==> Done (loaded %d/%d)' % (len(update_model_state), len(state_dict)))
         
-    def reptile(self, filenames, logger, to_cpu=False, pre_trained_path=None):
+    def reptile(self, filenames, logger, to_cpu=False):
         model_state_disks = []
         for filename in filenames:
             if not os.path.isfile(filename):
@@ -393,10 +393,6 @@ class Detector3DTemplate(nn.Module):
             loc_type = torch.device('cpu') if to_cpu else None
             checkpoint = torch.load(filename, map_location=loc_type)
             model_state_disk = checkpoint['model_state']
-            if not pre_trained_path is None:
-                pretrain_checkpoint = torch.load(pre_trained_path, map_location=loc_type)
-                pretrain_model_state_disk = pretrain_checkpoint['model_state']
-                model_state_disk.update(pretrain_model_state_disk)
                 
             version = checkpoint.get("version", None)
             if version is not None:
