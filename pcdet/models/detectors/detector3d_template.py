@@ -480,3 +480,4 @@ class Detector3DTemplate(nn.Module):
         logger.info('==> Done')
 
         return it, epoch
+
