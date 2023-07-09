@@ -27,7 +27,9 @@ def parse_config():
     parser.add_argument('--workers', type=int, default=4, help='number of workers for dataloader')
     parser.add_argument('--extra_tag', type=str, default='default', help='extra tag for this experiment')
     parser.add_argument('--ckpts', type=str, default=None, nargs='+', help='checkpoint to start from')
+    parser.add_argument('--pretrained_model', type=str, default=None, required=True, help='pretrained_model')
     parser.add_argument('--epoch_id', type=int, default=None, required=True, help='which epoch')
+    parser.add_argument('--epsilon', type=float, default=1.0, required=True, help='epsilon (learning rate) of Reptile')
 
     parser.add_argument('--launcher', choices=['none', 'pytorch', 'slurm'], default='none')
     parser.add_argument('--tcp_port', type=int, default=18888, help='tcp port for distrbuted training')
@@ -59,13 +61,8 @@ def parse_config():
 def reptile(model, test_loader, args, eval_output_dir, logger, epoch_id, dist_test=False):
     # load checkpoint
     print(args.ckpts)
-    model.reptile(filenames=args.ckpts, logger=logger, to_cpu=dist_test)
+    model.reptile(filenames=args.ckpts, pretrained=args.pretrained_model, logger=logger, epsilon=args.epsilon, to_cpu=dist_test)
     model.cuda()
-
-    # save checkpoint
-    save_checkpoint(
-        checkpoint_state(model, None, 99, None), filename='../output/custom_models/pointrcnn_pretrained/reptile',
-    )
     
     # start evaluation
     eval_utils.eval_one_epoch(
@@ -73,6 +70,10 @@ def reptile(model, test_loader, args, eval_output_dir, logger, epoch_id, dist_te
         result_dir=eval_output_dir
     )
 
+    # save checkpoint
+    save_checkpoint(
+        checkpoint_state(model, None, 99, None), filename='../output/custom_models/pointrcnn_pretrained/reptile',
+    )
 
 def main():
     args, cfg = parse_config()
