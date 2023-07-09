@@ -117,8 +117,15 @@ print('fail_tall_with_hang\t:', len(fail_tall_with_hang))
 print('total data\t\t:', len(fail_tall_no_hang + fail_m + both_fail_with_hang + both_fail_no_hang + fail_tall_with_hang))
 print()
 
+# split to k shot
+import copy
+k = 10000 # big value means all shot
+all_fail_tall_no_hang = [copy.deepcopy(fail_tall_no_hang[i:i+k]) for i in range(0, len(fail_tall_no_hang), k)]
+all_fail_tall_with_hang = [copy.deepcopy(fail_tall_with_hang[i:i+k]) for i in range(0, len(fail_tall_with_hang), k)]
+all_fail_m = [copy.deepcopy(fail_m[i:i+k]) for i in range(0, len(fail_m), k)]
+
 reptile_data = {
-                'train' : [fail_tall_no_hang, fail_tall_with_hang, fail_m],
+                'train' : all_fail_tall_no_hang + all_fail_tall_with_hang + all_fail_m,
                 'val'   : [both_fail_with_hang + both_fail_no_hang] 
                 }
     
@@ -159,7 +166,11 @@ for reptile_idx in range(len(reptile_data['train'])):
     directory = os.path.join(os.getcwd(), directory)
 
     # preparing training each training dataset
-    filenames = reptile_data['train'][reptile_idx] + reptile_data['val'][-1]
+    # actually in alll case, we should include reptile_data['val'][-1], but we save memory 
+    if reptile_idx == 0:
+        filenames = reptile_data['train'][reptile_idx] + reptile_data['val'][-1]
+    else:
+        filenames = reptile_data['train'][reptile_idx]
     filenames = list(map(lambda x: 'fail' + str(x) + '.json', filenames))
     for filename_idx in tqdm(range(len(filenames)), desc =f'Preparing Reptile training dataset {new_directory}...'):
         # get filename
@@ -222,7 +233,11 @@ for reptile_idx in range(len(reptile_data['train'])):
     # prepare imagesets
     ###########################################################    
     train_ids = reptile_data['train'][reptile_idx]
-    val_ids   = reptile_data['val'][-1]
+    # actually val_ids should be reptile_data['val'][-1] for all, but we want to save memory
+    if reptile_idx == 0:
+        val_ids   = reptile_data['val'][-1]
+    else:
+        val_ids = reptile_data['train'][reptile_idx]
     
     training_data_use_percentage = 1.0
     total_training_data = int(training_data_use_percentage * len(train_ids))
