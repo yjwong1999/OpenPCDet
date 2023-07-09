@@ -167,10 +167,7 @@ for reptile_idx in range(len(reptile_data['train'])):
 
     # preparing training each training dataset
     # actually in alll case, we should include reptile_data['val'][-1], but we save memory 
-    if reptile_idx == 0:
-        filenames = reptile_data['train'][reptile_idx] + reptile_data['val'][-1]
-    else:
-        filenames = reptile_data['train'][reptile_idx]
+    filenames = reptile_data['train'][reptile_idx] + reptile_data['val'][-1]
     filenames = list(map(lambda x: 'fail' + str(x) + '.json', filenames))
     for filename_idx in tqdm(range(len(filenames)), desc =f'Preparing Reptile training dataset {new_directory}...'):
         # get filename
@@ -234,10 +231,7 @@ for reptile_idx in range(len(reptile_data['train'])):
     ###########################################################    
     train_ids = reptile_data['train'][reptile_idx]
     # actually val_ids should be reptile_data['val'][-1] for all, but we want to save memory
-    if reptile_idx == 0:
-        val_ids   = reptile_data['val'][-1]
-    else:
-        val_ids = reptile_data['train'][reptile_idx]
+    val_ids   = reptile_data['val'][-1]
     
     training_data_use_percentage = 1.0
     total_training_data = int(training_data_use_percentage * len(train_ids))
