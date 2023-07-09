@@ -383,9 +383,10 @@ class Detector3DTemplate(nn.Module):
 
         logger.info('==> Done (loaded %d/%d)' % (len(update_model_state), len(state_dict)))
         
-    def reptile(self, filenames, logger, to_cpu=False):
+    def reptile(self, filenames, pretrained, logger, epsilon=0.1, to_cpu=False):
         model_state_disks = []
-        for filename in filenames:
+        pretrained_model_state_disks = None
+        for filename in filenames + [pretrained]:
             if not os.path.isfile(filename):
                 raise FileNotFoundError
 
@@ -399,6 +400,8 @@ class Detector3DTemplate(nn.Module):
                 logger.info('==> Checkpoint trained from version: %s' % version)
     
             model_state_disks.append(model_state_disk)
+        model_state_disks = model_state_disks[:-1]
+        pretrained_model_state_disks = model_state_disks[-1]
         
         # reptile
         strict = False
@@ -409,6 +412,7 @@ class Detector3DTemplate(nn.Module):
         # for key, val in model_state_disk.items():
         for i, (key, val) in enumerate(model_state_disks[-1].items()):
             vals = []
+            pretrained_val = None
             
             # not sure what, but yup
             if key in spconv_keys and key in state_dict and state_dict[key].shape != val.shape:
@@ -418,28 +422,49 @@ class Detector3DTemplate(nn.Module):
                 # process val corresponding to current key for all models
                 for j in range(len(model_state_disks)):
                     val = model_state_disks[j][key]
+                    pretrained_val = pretrained_model_state_disks[key]
 
                     val_native = val.transpose(-1, -2)  # (k1, k2, k3, c_in, c_out) to (k1, k2, k3, c_out, c_in)
+                    pretrained_val_native = pretrained_val.transpose(-1, -2)
+                    
                     if val_native.shape == state_dict[key].shape:
                         val = val_native.contiguous()
+                        pretrained_val = pretrained_val_native.contiguous()
                     else:
                         assert val.shape.__len__() == 5, 'currently only spconv 3D is supported'
+                        
                         val_implicit = val.permute(4, 0, 1, 2, 3)  # (k1, k2, k3, c_in, c_out) to (c_out, k1, k2, k3, c_in)
+                        pretrained_val_implicit = pretrained_val.permute(4, 0, 1, 2, 3)
+                        
                         if val_implicit.shape == state_dict[key].shape:
                             val = val_implicit.contiguous()
+                            pretrained_val = pretrained_val_implicit.contiguous()
                     # keep the val
                     vals.append(val)
             else:
                 for j in range(len(model_state_disks)):
-                    val = model_state_disks[j][key]  
+                    val = model_state_disks[j][key] 
+                    pretrained_val = pretrained_model_state_disks[key] 
+                    
                     # keep the val
                     vals.append(val)
             
             # reptile here
-            val = torch.stack(vals, dim=0).sum(dim=0).sum(dim=0) / len(model_state_disks)
+            alist = [vals[k] - pretrained_val for k in range(len(vals))]
+            gradient = torch.stack(alist, dim=0).sum(dim=0) / len(vals)
+            '''
+            if i == 0 or i ==2:
+                print(gradient.cpu().numpy())
+                print(vals[0].cpu().numpy())
+                print(vals[1].cpu().numpy())
+                print(vals[2].cpu().numpy())
+            '''
+            new_pretrained_val = pretrained_val + epsilon * gradient 
+            
+            #val = torch.stack(vals, dim=0).sum(dim=0) / len(model_state_disks)
 
-            if key in state_dict and state_dict[key].shape == val.shape:
-                update_model_state[key] = val
+            if key in state_dict and state_dict[key].shape == new_pretrained_val.shape:
+                update_model_state[key] = new_pretrained_val
                 # logger.info('Update weight %s: %s' % (key, str(val.shape)))
 
         if strict:
