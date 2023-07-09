@@ -35,7 +35,7 @@ Dataset splits need to be pre-defined and placed in `ImageSets`
 ## Hyper-parameters Configurations
 
 ### Point cloud features
-Modify following configurations in `custom_dataset.yaml` to 
+Modify following configurations in `OpenPCDet/tools/cfgs/dataset_configs/custom_dataset.yaml` to 
 suit your own point clouds.
 ```yaml
 POINT_FEATURE_ENCODING: {
