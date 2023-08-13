@@ -36,7 +36,6 @@ class DemoDataset(DatasetTemplate):
         self.root_path = root_path
         self.ext = ext
         data_file_list = glob.glob(str(root_path / f'*{self.ext}')) if self.root_path.is_dir() else [self.root_path]
-        assert len(data_file_list) >= 1, f"The provided file(s) does not end with extension {self.ext} \nKindly raise the argument --ext to change the extension to be either .bin or .npy"
 
         data_file_list.sort()
         self.sample_file_list = data_file_list
