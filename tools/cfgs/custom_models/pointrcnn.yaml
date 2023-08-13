@@ -9,8 +9,8 @@ DATA_CONFIG:
 
         -   NAME: sample_points
             NUM_POINTS: {
-                'train': 16384,
-                'test': 16384
+                'train': 40000,
+                'test': 40000
             }
 
         -   NAME: shuffle_points
@@ -55,7 +55,7 @@ MODEL:
         LOSS_CONFIG:
             LOSS_REG: WeightedSmoothL1Loss
             LOSS_WEIGHTS: {
-                'point_cls_weight': 2.0,
+                'point_cls_weight': 1.0,
                 'point_box_weight': 1.0,
                 'code_weights': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
             }
@@ -143,7 +143,7 @@ OPTIMIZATION:
     NUM_EPOCHS: 80
 
     OPTIMIZER: adam_onecycle
-    LR: 0.01
+    LR: 0.0001
     WEIGHT_DECAY: 0.01
     MOMENTUM: 0.9
 

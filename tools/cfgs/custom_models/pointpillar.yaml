@@ -2,7 +2,7 @@ CLASS_NAMES: ['pass','fail']
 
 DATA_CONFIG: 
     _BASE_CONFIG_: cfgs/dataset_configs/custom_dataset.yaml
-    POINT_CLOUD_RANGE: [-36.8, -24.0, -42.0, 36.8, 24.0, 42.0]
+    POINT_CLOUD_RANGE: [0.0, 0.0, 0.06, 28.8, 28.8, 43.26]
     DATA_PROCESSOR:
         - NAME: mask_points_and_boxes_outside_range
           REMOVE_OUTSIDE_BOXES: True
@@ -14,10 +14,10 @@ DATA_CONFIG:
           }
 
         - NAME: transform_points_to_voxels
-          VOXEL_SIZE: [0.1, 0.1, 84]
+          VOXEL_SIZE: [0.1, 0.1, 43.2]
           MAX_POINTS_PER_VOXEL: 32
           MAX_NUMBER_OF_VOXELS: {
-            'train': 16000,
+            'train': 40000,
             'test': 40000
           }
     DATA_AUGMENTOR:
@@ -28,11 +28,11 @@ DATA_CONFIG:
               DB_INFO_PATH:
                   - custom_dbinfos_train.pkl
               PREPARE: {
-                 filter_by_min_points: ['pass:5', 'fail:5'],
+                 filter_by_min_points: ['pass:5','fail:5'] #['pass:1', 'fail:1'],
                  #filter_by_difficulty: [-1],
               }
 
-              SAMPLE_GROUPS: ['pass:15','fail:15']
+              SAMPLE_GROUPS: ['pass:15','fail:15'] #['pass:5','fail:5']
               NUM_POINT_FEATURES: 4
               DATABASE_WITH_FAKELIDAR: False
               REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
@@ -42,10 +42,10 @@ DATA_CONFIG:
               ALONG_AXIS_LIST: ['x']
 
             - NAME: random_world_rotation
-              WORLD_ROT_ANGLE: [-0.05, 0.05] #[-0.78539816, 0.78539816]
+              WORLD_ROT_ANGLE: [-0, 0] #[-0.78539816, 0.78539816]
 
             - NAME: random_world_scaling
-              WORLD_SCALE_RANGE: [0.95, 1.05]
+              WORLD_SCALE_RANGE: [0.99, 1.01] #[0.95, 1.05]
 
 MODEL:
     NAME: PointPillar
@@ -112,8 +112,8 @@ MODEL:
         LOSS_CONFIG:
             LOSS_WEIGHTS: {
                 'cls_weight': 1.0,
-                'loc_weight': 2.0,
-                'dir_weight': 0.2,
+                'loc_weight': 4.0, #2.0,
+                'dir_weight': 1.0, #0.2,
                 'code_weights': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
             }
 
@@ -137,7 +137,7 @@ OPTIMIZATION:
     NUM_EPOCHS: 80
 
     OPTIMIZER: adam_onecycle
-    LR: 0.003
+    LR: 0.0003 #0.0003
     WEIGHT_DECAY: 0.01
     MOMENTUM: 0.9
 
