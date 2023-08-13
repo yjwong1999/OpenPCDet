@@ -1,7 +1,7 @@
 DATASET: 'CustomDataset'
 DATA_PATH: '../data/custom'
 
-POINT_CLOUD_RANGE: [0.0, 0.0, 0.06, 28.8, 28.8, 43.26]
+POINT_CLOUD_RANGE: [-40.0, -25.6, -45.0, 40.0, 25.6, 45.0]
 
 CLASS_NAMES: ['pass', 'fail']  
 
@@ -34,23 +34,23 @@ DATA_AUGMENTOR:
           DB_INFO_PATH:
               - custom_dbinfos_train.pkl
           PREPARE: {
-             filter_by_min_points: ['pass:5', 'fail:5'] #['pass:1', 'fail:1'],
+             filter_by_min_points: ['pass:5', 'fail:5'],
           }
 
-          SAMPLE_GROUPS:  ['pass:15', 'fail:20'] #['pass:1', 'fail:1']
+          SAMPLE_GROUPS: ['pass:15', 'fail:20']
           NUM_POINT_FEATURES: 4
           DATABASE_WITH_FAKELIDAR: False
           REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
           LIMIT_WHOLE_SCENE: True
 
         - NAME: random_world_flip
-          ALONG_AXIS_LIST: ['x'] # ['x', 'y']
+          ALONG_AXIS_LIST: ['x', 'y']
 
         - NAME: random_world_rotation
           WORLD_ROT_ANGLE: [0, 0] #[-0.05, 0.05] #[-0.78539816, 0.78539816]
 
         - NAME: random_world_scaling
-          WORLD_SCALE_RANGE: [0.99, 1.01] #[0.95, 1.05]
+          WORLD_SCALE_RANGE: [0.95, 1.05]
 
 DATA_PROCESSOR:
     - NAME: mask_points_and_boxes_outside_range
@@ -66,6 +66,6 @@ DATA_PROCESSOR:
       VOXEL_SIZE: [0.1, 0.1, 0.15]
       MAX_POINTS_PER_VOXEL: 5
       MAX_NUMBER_OF_VOXELS: {
-        'train': 1500000,
-        'test': 1500000
+        'train': 150000,
+        'test': 150000
       }
