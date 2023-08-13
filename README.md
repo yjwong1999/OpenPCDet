@@ -1,5 +1,3 @@
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FJgfZz8QlP5PF9NBsIKKGGeiSu5boxxJ?usp=sharing)
-
 <img src="docs/open_mmlab.png" align="right" width="30%">
 
 # OpenPCDet
