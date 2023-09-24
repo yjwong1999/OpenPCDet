@@ -1,7 +1,7 @@
 DATASET: 'CustomDataset'
 DATA_PATH: '../data/custom'
 
-POINT_CLOUD_RANGE: [0.0, 0.0, 0.06, 28.8, 28.8, 43.26]
+POINT_CLOUD_RANGE: [0.0, 0.0, 0.13, 28.8, 28.8, 43.33]
 
 CLASS_NAMES: ['pass', 'fail']  
 
