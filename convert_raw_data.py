@@ -96,7 +96,7 @@ args = parser.parse_args()
 # global variable
 point_cloud_ranges = [[],[],[],[],[],[]]
 magnify_factor = 20
-voxel_size_x, voxel_size_y, voxel_size_z = 0.1, 0.1, 0.15 # default
+voxel_size_x, voxel_size_y, voxel_size_z = 0.2, 0.2, 0.15 # default
 multiplier_x, multiplier_y, multiplier_z = 16, 16, 16
 z_range = 40
 
