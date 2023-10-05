@@ -2,7 +2,7 @@ CLASS_NAMES: ['pass','fail']
 
 DATA_CONFIG: 
     _BASE_CONFIG_: cfgs/dataset_configs/custom_dataset.yaml
-    POINT_CLOUD_RANGE: [0.0, 0.0, 0.13, 28.8, 28.8, 43.33]
+    POINT_CLOUD_RANGE: [0.0, 0.0, 0.13, 28.8, 28.8, 21.73]
     DATA_PROCESSOR:
         - NAME: mask_points_and_boxes_outside_range
           REMOVE_OUTSIDE_BOXES: True
@@ -14,7 +14,7 @@ DATA_CONFIG:
           }
 
         - NAME: transform_points_to_voxels
-          VOXEL_SIZE: [0.1, 0.1, 43.2]
+          VOXEL_SIZE: [0.2, 0.2, 21.6]
           MAX_POINTS_PER_VOXEL: 32
           MAX_NUMBER_OF_VOXELS: {
             'train': 40000,
@@ -42,10 +42,10 @@ DATA_CONFIG:
               ALONG_AXIS_LIST: ['x']
 
             - NAME: random_world_rotation
-              WORLD_ROT_ANGLE: [-0, 0] #[-0.78539816, 0.78539816]
+              WORLD_ROT_ANGLE: [-0, 0]
 
             - NAME: random_world_scaling
-              WORLD_SCALE_RANGE: [0.99, 1.01] #[0.95, 1.05]
+              WORLD_SCALE_RANGE: [0.99, 1.01]
 
 MODEL:
     NAME: PointPillar
@@ -119,7 +119,7 @@ MODEL:
 
     POST_PROCESSING:
         RECALL_THRESH_LIST: [0.3, 0.5, 0.7]
-        SCORE_THRESH: 0.25
+        SCORE_THRESH: 0.1 #0.25
         OUTPUT_RAW_SCORE: False
 
         EVAL_METRIC: kitti
