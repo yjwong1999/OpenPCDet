@@ -37,15 +37,19 @@ fi
 
 
 ################################
-# Download client dataset
+# Download client dataset 
 ################################
 if [ -d "data_raw/techpartnerfile" ]; then
     echo -e "The client data has been downloaded previously.\n"
 else
     cd "data_raw"
     echo -e "The client data zip file does not exists. Downloading now...\n"
+    # download ply file
     wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46" -O "techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt
     unzip "techpartnerfile-ply.zip" -d "techpartnerfile"
+    # download labels
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt
+    unzip "techpartnerfile_label.zip" -d "techpartnerfile"
     cd ../
     echo " "
 fi
