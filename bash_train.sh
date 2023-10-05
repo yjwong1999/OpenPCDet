@@ -38,6 +38,12 @@ python3 batch_fix_label.py --label_dir data_raw/techpartnerfile/techpartnerfile_
 
 
 ################################
+# Augmentation
+################################
+python3 batch_augment.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+
+
+################################
 # Convert raw data + labelCloud format -> OpenPCDet raw format for custom data 
 ################################
 '''
