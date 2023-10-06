@@ -29,7 +29,7 @@ print()
 if "part1" in file_names[0] or "part2" in file_names[0]:
     print('Apparently, you have spliited the preprocessed data previously! Please check')
 else:
-    for idx in tqdm(range(len(file_names)), desc =f'Preprocessing (downsample + filter) input data...'):
+    for idx in tqdm(range(len(file_names)), desc =f'Splitting and cropping the RoRI of input data...'):
         ####################################
         # Split data (ply)
         ####################################
