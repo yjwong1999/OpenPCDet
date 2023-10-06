@@ -24,7 +24,7 @@ conda activate openpcdet
 ################################
 NAME="custom"
 LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
-PLY_DIR="data_raw/techpartnerfile/techpartnerfile-ply"
+PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 
 #CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
 CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
@@ -34,7 +34,7 @@ CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
 ################################
 # Fix the label path name in the json label, in case multiple did the labelling -> insonsistency
 ################################
-python3 batch_fix_label.py --label_dir data_raw/techpartnerfile/techpartnerfile_label --ply_dir data_raw/techpartnerfile/preprocessed_techpartnerfile-ply
+python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 
 
 ################################
@@ -72,7 +72,7 @@ python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/da
 # pointrcnn
 cd tools
 #python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 2 --workers 1 --epochs 300 #--pretrained_model ../output/pretrained_models/pretrained_pointrcnn.pth
-python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 3 --workers 1 --epochs 100
+python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 6 --workers 1 --epochs 100
 #python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 3 --workers 1 --epochs 100
 
 ################################
