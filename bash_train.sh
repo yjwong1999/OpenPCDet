@@ -32,15 +32,9 @@ CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
 
 
 ################################
-# Fix the label path name in the json label, in case multiple did the labelling -> insonsistency
+# Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
 python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
-
-
-################################
-# Augmentation
-################################
-python3 batch_augment.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 
 
 ################################
