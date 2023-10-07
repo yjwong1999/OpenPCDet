@@ -15,7 +15,7 @@
 source ~/anaconda3/bin/activate
 conda init bash
 echo " "
-conda activate mimos
+conda activate openpcdet
 
 
 ################################
