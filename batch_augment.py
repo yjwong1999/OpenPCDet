@@ -77,6 +77,14 @@ def augment(np_pcd, obj, aug_type=None):
     # no augment
     if aug_type == -1:
         return np_pcd, obj
+    elif aug_type == 0:
+        pass
+    elif aug_type == 1:
+        displacement = np.random.uniform(0.2, 0.4)
+    elif aug_type == 2:
+        pass
+    elif aug_type == 3:
+        rot_angle_z = np.random.uniform(-0.6, 0.6)
 
     # extract bbox properties
     x_centroid = obj['centroid']['x']
