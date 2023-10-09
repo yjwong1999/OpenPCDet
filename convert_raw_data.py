@@ -214,17 +214,33 @@ while True:
     ###########################################################
     np.random.seed(123)
     np.random.shuffle(ids)
+
+    """
+    Method A: separate by percentage
+    """
     train_ids = ids[:int(len(ids)*0.8)]
     val_ids   = ids[int(len(ids)*0.8):]
 
-    training_data_use_percentage = 1.0
-    total_training_data = int(training_data_use_percentage * len(train_ids))
+    """
+    Method B: separate by augmentation
+    """
+    train_ids, val_ids = [], []
+    for id_ in ids:
+        print(id_)
+        if 'augmented' in id_:
+            train_ids.append(id_)
+        else:
+            val_ids.append(id_)
 
+    #train_ids = train_ids + val_ids[:int(len(val_ids) / 2)]
+    #val_ids = val_ids[int(len(val_ids) / 2) :]
+    
+    # txt filename (train-val split)
     train_txt = os.path.join(npy_file[:npy_file.find('points')], 'ImageSets', 'train.txt')
     val_txt   = os.path.join(npy_file[:npy_file.find('points')], 'ImageSets', 'val.txt')
 
     with open(train_txt, "w") as f:
-        f.writelines("%s\n" % id_ for id_ in train_ids[:total_training_data])
+        f.writelines("%s\n" % id_ for id_ in train_ids)
 
     with open(val_txt, "w") as f:
         f.writelines("%s\n" % id_ for id_ in val_ids)
