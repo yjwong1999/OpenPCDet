@@ -80,11 +80,13 @@ def augment(np_pcd, obj, aug_type=None):
     elif aug_type == 0:
         pass
     elif aug_type == 1:
-        displacement = np.random.uniform(0.2, 0.4)
+        displacement = np.random.uniform(0.2, 0.4, 1)[0]
     elif aug_type == 2:
         pass
     elif aug_type == 3:
-        rot_angle_z = np.random.uniform(-0.6, 0.6)
+        rot_angle_z = np.random.uniform(0.4, 1.5, 1)[0] # radian
+        if np.random.rand() > 0.5:
+            rot_angle_z *= -1
 
     # extract bbox properties
     x_centroid = obj['centroid']['x']
@@ -118,7 +120,7 @@ def augment(np_pcd, obj, aug_type=None):
                 
             # 1: if move upward
             elif aug_type == 1: 
-                new_point = point + np.array([0, 0, 0.2])
+                new_point = point + np.array([0, 0, displacement])
                 np_pcd[i] = new_point    
             
             # 2: if top/down flip
@@ -170,9 +172,7 @@ def augment(np_pcd, obj, aug_type=None):
                         rot_origin_y = y2
 
                 # rotation angle at z            
-                rot_angle_z = 0.6 #np.random.uniform(0.5, 0.7, 1)[0] # radian
-                #if np.random.rand() > 0.5:
-                    #rot_angle_z *= -1
+                rot_angle_z = rot_angle_z
 
                 # edit the point
                 new_point = rotate_point(point, rot_angle_z, rot_origin_x, rot_origin_y)
@@ -197,7 +197,7 @@ def augment(np_pcd, obj, aug_type=None):
     # 1: if move upward    
     elif aug_type == 1:   
         # augment label
-        obj['centroid']['z'] = obj['centroid']['z'] + 0.2
+        obj['centroid']['z'] = obj['centroid']['z'] + displacement
 
     # 2: if top/down flip
     elif aug_type == 2: 
