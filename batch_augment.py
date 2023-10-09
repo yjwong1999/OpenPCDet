@@ -352,7 +352,7 @@ for fn_idx in tqdm(range(len(filenames)), desc =f'Data Augmentation'):
         #o3d.visualization.draw_geometries([color_grad])
         
         # save ply and label
-        new_ply_filename = os.path.join(ply_dir, f'00{aug_idx} ' + filename).replace('.json', '.ply')
+        new_ply_filename = os.path.join(ply_dir, f'augmented_00{aug_idx} ' + filename).replace('.json', '.ply')
         o3d.io.write_point_cloud(new_ply_filename, color_grad) # save the filtered point cloud
         
         new_label_filename = os.path.join(label_dir, f'augmented_00{aug_idx} ' + filename)
@@ -362,8 +362,6 @@ for fn_idx in tqdm(range(len(filenames)), desc =f'Data Augmentation'):
         d['objects'] = final_objs
         with open(new_label_filename, 'w', encoding='utf-8') as f:
             json.dump(d, f, ensure_ascii=False, indent=4)
-
-
 
 
 
