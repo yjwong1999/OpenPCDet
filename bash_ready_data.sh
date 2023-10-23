@@ -46,10 +46,10 @@ else
     cd "data_raw"
     echo -e "The client data zip file does not exists. Downloading now...\n"
     # download ply file
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1WKYjcnPqB0RFZpaFAzLWJL8KiktTpCoA' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1WKYjcnPqB0RFZpaFAzLWJL8KiktTpCoA" -O "preprocessed_techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT" -O "preprocessed_techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt
     unzip "preprocessed_techpartnerfile-ply.zip" -d "techpartnerfile"
     # download labels
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Q9Vy_Gd3OLKXVJ9LO0KatQIfu_sPW3Hs' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1Q9Vy_Gd3OLKXVJ9LO0KatQIfu_sPW3Hs" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt
     unzip "techpartnerfile_label.zip" -d "techpartnerfile"
     cd ../
     echo " "
