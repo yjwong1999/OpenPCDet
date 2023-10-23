@@ -142,6 +142,7 @@ while True:
     ###########################################################
     # get all data id name
     ids = []
+    ids_with_fail = []
     # read json
     directory = args.dir
     directory = os.path.join(os.getcwd(), directory)
@@ -179,11 +180,14 @@ while True:
         ###########################################################
         objects = data['objects']
         annotations = []
+        with_fail = False
         for obj in objects:
             x, y, z = obj['centroid']['x'], obj['centroid']['y'], obj['centroid']['z']
             dx, dy, dz = obj['dimensions']['length'], obj['dimensions']['width'], obj['dimensions']['height']
             yaw = obj['rotations']['z']
             category_name = obj['name'].replace('good', 'pass').replace('defect', 'fail')
+            if category_name == 'fail':
+                with_fail = True
             temp = [x, y, z, dx, dy, dz, yaw, category_name]
             temp = [x * magnify_factor, y * magnify_factor, z * magnify_factor, \
                     dx * magnify_factor, dy  * magnify_factor, dz * magnify_factor, \
@@ -206,7 +210,12 @@ while True:
         ###########################################################
         # get id
         ###########################################################
-        ids.append(os.path.split(npy_file)[1][:-4].replace('fail', ''))
+        id_ = os.path.split(npy_file)[1][:-4].replace('fail', '')
+        
+        if with_fail:
+            ids_with_fail.append(id_)
+        else:
+            ids.append(id_)
 
 
     ###########################################################
@@ -214,26 +223,36 @@ while True:
     ###########################################################
     np.random.seed(123)
     np.random.shuffle(ids)
+    np.random.seed(123)
+    np.random.shuffle(ids_with_fail)
 
     """
     Method A: separate by percentage
     """
-    train_ids = ids[:int(len(ids)*0.8)]
-    val_ids   = ids[int(len(ids)*0.8):]
+    train_ids = ids[:int(len(ids)*0.8)] + ids_with_fail[:int(len(ids_with_fail)*0.8)]
+    val_ids   = ids[int(len(ids)*0.8):] + ids_with_fail[int(len(ids_with_fail)*0.8):]
 
     """
     Method B: separate by augmentation
     """
     train_ids, val_ids = [], []
-    for id_ in ids:
-        print(id_)
+    cache = []
+    
+    # this part is for ids_with_fail
+    for id_ in ids_with_fail:
         if 'augmented' in id_:
             train_ids.append(id_)
         else:
-            val_ids.append(id_)
+            cache.append(id_)
+    train_ids += cache[:int(len(cache)*0.5)] * 10
+    val_ids   += cache[int(len(cache)*0.5):]
 
-    #train_ids = train_ids + val_ids[:int(len(val_ids) / 2)]
-    #val_ids = val_ids[int(len(val_ids) / 2) :]
+    # this part is to handle ids
+    train_ids += ids[:int(len(ids)*0.5)]
+    val_ids   += ids[int(len(ids)*0.5):]
+
+    # shuffle training data
+    np.random.shuffle(train_ids)
     
     # txt filename (train-val split)
     train_txt = os.path.join(npy_file[:npy_file.find('points')], 'ImageSets', 'train.txt')
@@ -260,10 +279,10 @@ while True:
     ##############
     # condition 2
     ##############
-    for i in range(100):
+    for i in range(500):
         temp_x = i * multiplier_x * voxel_size_x
         temp_y = i * multiplier_y * voxel_size_y
-        temp_z = i * multiplier_z * voxel_size_z
+        #temp_z = i * multiplier_z * voxel_size_z
 
         sub_condition_x = temp_x > point_cloud_ranges[3] - point_cloud_ranges[0]
         sub_condition_y = temp_y > point_cloud_ranges[4] - point_cloud_ranges[1]
@@ -279,7 +298,7 @@ while True:
     point_cloud_ranges[4] = point_cloud_ranges[1] + temp_y
     # z axis
     point_cloud_ranges[2] = point_cloud_ranges[2]
-    point_cloud_ranges[5] = point_cloud_ranges[2] + temp_z
+    point_cloud_ranges[5] = point_cloud_ranges[5] #point_cloud_ranges[2] + temp_z
 
     # round to 2 decimal places
     point_cloud_ranges = [np.around(item, decimals=2) for item in point_cloud_ranges]
@@ -370,4 +389,3 @@ if model_name in ['PointPillar']:
         file.seek(0)
         file.writelines(lines)
         file.truncate()
-
