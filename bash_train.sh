@@ -66,7 +66,7 @@ python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/da
 # pointrcnn
 cd tools
 #python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 2 --workers 1 --epochs 300 #--pretrained_model ../output/pretrained_models/pretrained_pointrcnn.pth
-python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 6 --workers 1 --epochs 100
+python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 4 --workers 1 --epochs 100
 #python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 3 --workers 1 --epochs 100
 
 ################################
