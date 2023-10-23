@@ -1,5 +1,11 @@
 import os, shutil, copy
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--val-num', type = int, required = True, default = 1, help="how many samples from each fail type as validation")
+parser.add_argument('--upsample', type = int, required = True, default = 10, help="upsample defect files")
+args = parser.parse_args()
 
 # remove previous model
 try:
@@ -64,8 +70,8 @@ all_fail_filenames = [fail_1_filenames, fail_2_filenames, fail_3_filenames, fail
 all_pass_filenames = copy.deepcopy(pass_filenames)
 
 # take VAL_N sample from each type of fails for validation (1 in this case becuz too less)
-VAL_N = 1
-UPSAMPLE = 10
+VAL_N = args.val_num
+UPSAMPLE = args.upsample
 NUM_TASK = len(all_fail_filenames)
 
 val_filenames = []
