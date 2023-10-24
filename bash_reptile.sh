@@ -1,103 +1,138 @@
 #!/bin/bash
 
-###############################################################################################
-# cleansing unused files/directories
-###############################################################################################
-# remove all pointrcnn files with reptile name
-cd  output/custom_models
-find . -type d -name "*reptile*" -exec rm -rf {} +
-
-# remove previous round of pointrcnn to prevent clash
-rm -r -v "pointrcnn"
-
-# create a copy of pretrained model
-rm -r "pointrcnn_pretrained"
-cp -r "pointrcnn_pretrained (copy)" "pointrcnn_pretrained"
-cd ../../
+################################
+# README
+# This .sh file is to:
+# 1. Convert raw data + labelCloud format -> OpenPCDet raw format for custom data
+# 2. Convert OpenPCDet raw format to KITTI
+# 3. Train the model via reptile
+################################
 
 
-###############################################################################################
-# now lets start
-###############################################################################################
-# convert raw data to openpcdet format (this will create data/reptile, data/reptile_2, ...)
-if [ ! -d "data/reptile" ]; then
-  python3 convert_raw_data_for_reptile.py --dir "data_raw/Mimos Dataset 2023/labels"
+################################
+# Setup anaconda3
+# https://stackoverflow.com/a/70293309
+################################
+source ~/anaconda3/bin/activate
+conda init bash
+echo " "
+conda activate openpcdet
+
+
+################################
+# hyperparameters
+################################
+NAME="custom"
+LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
+PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
+
+#CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
+CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
+#CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+
+
+################################
+# Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
+################################
+python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+
+
+################################
+# Convert raw data + labelCloud format -> OpenPCDet raw format for custom data 
+################################
+if [ -d "data/custom" ]; then
+    rm -r "data/custom"
 fi
-count=$(ls -dq *data/reptile* | wc -l)
-echo -e "There are $count Reptile Training Dataset \n"
+python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE
+echo ""
 
-# define hyperparameters
-epochs=10
-outer_loop=100
-inner_loop=$count
-epsilon=1.0
 
-# outer loop
-for i in $(seq 1 $outer_loop)
+################################
+# Download pretrained models as starting weight for reptile
+################################
+if [ -d "output/pretrained" ]; then
+    echo -e "Pretrained models are downloaded previously\n"
+else
+    if [ -d "output" ]; then
+        echo -e "Output directory exists\n"
+    else
+         mkdir 'output'
+    fi
+    mkdir 'output/pretrained'
+    cd output/pretrained
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1wMxWTpU1qUoY3DsCH31WJmvJxcjFXKlm' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1wMxWTpU1qUoY3DsCH31WJmvJxcjFXKlm" -O "pretrained_pointpillar.pth" && rm -rf /tmp/cookies.txt
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-" -O "pretrained_pvrcnn.pth" && rm -rf /tmp/cookies.txt
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1BCX9wMn-GYAfSOPpyxf6Iv6fc0qKLSiU' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1BCX9wMn-GYAfSOPpyxf6Iv6fc0qKLSiU" -O "pretrained_pointrcnn.pth" && rm -rf /tmp/cookies.txt
+    cd ../../
+fi
+
+
+################################
+# create reptile data
+################################
+python3 create_reptile_data.py --val-num 1 --upsample 10
+
+
+################################
+# reptile
+################################
+NUM_TASK=4
+
+EPOCHS=10
+EPSILON=1.0
+OUTER_LOOP=100
+INNER_LOOP=$NUM_TASK
+PRETRAINED_PATH='../output/pretrained/pretrained_pointpillar.pth'
+
+# loop outer loop
+for i in $(seq 1 $OUTER_LOOP)
 do
-  # initialize a string to hold all task specific models, which will be argument for python3 reptile.py
-  # (i.e.: '"/xxx/xxx/model" "/xxx/xxx/model_2" "/xxx/xxx/model_3" ')
-  all_model=''
-  
-  for j in $(seq 1 $inner_loop)
-  do
-    # all reptile data are renamed as data/custom for generalizability
-    if [ $j -eq 1 ]
-    then
-        filename="data/reptile"
-    else
-        filename="data/reptile_$j"
-    fi
-    echo -e "Dealing with $filename"
-    mv $filename "data/custom"
-  
-    # generate the data using openpcdet
-    if [ ! -d "data/custom/gt_database" ]; then
-      python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml
-    fi
-  
-    # train pointrcnn on this reptile data
-    cd tools
-    python train.py --cfg_file cfgs/custom_models/pointrcnn.yaml --batch_size 2 --workers 1 --epochs $epochs --pretrained_model ../output/custom_models/pointrcnn_pretrained/reptile.pth
-    cd ../
-  
-    # rename back the file
-    mv "data/custom" $filename
-  
-    # rename the pointrcnn models (to prevent clash and overlap)
-    if [ $j -eq 1 ]
-    then
-        modelname="reptile"
-    else
-        modelname="reptile_$j"
-    fi
-  
-    # rename ../output/custom_models/pointrcnn to ../output/custom_models/pointrcnn (reptile_x), to prevent overwritten by new weights
-    mv "/home/tham/Desktop/mimos/OpenPCDet/output/custom_models/pointrcnn" "/home/tham/Desktop/mimos/OpenPCDet/output/custom_models/pointrcnn_$modelname"
-  
-    # add path of task specific models to all_model
-    all_model+=' '
-    all_model+="/home/tham/Desktop/mimos/OpenPCDet/output/custom_models/pointrcnn_$modelname/default/ckpt/checkpoint_epoch_$epochs.pth"
-  done
-  
-  # get reptile model (saved in output/custom_models/pointrcnn_pretrained)
-  mv "data/reptile" "data/custom"
-  cd tools
-  python3 reptile.py --cfg_file cfgs/custom_models/pointrcnn.yaml --ckpts $all_model --epoch_id $epochs --pretrained_model ../output/custom_models/pointrcnn_pretrained/reptile.pth --epsilon $epsilon
-  cd ../
-  mv "data/custom" "data/reptile"
+    echo -e "###############################"
+    echo -e "outer loop $i"
+    echo -e "###############################"
 
-  # remove all task specific models in previous outer loop
-  for j in $(seq 1 $inner_loop)
-  do
-    if [ $j -eq 1 ]
-    then
-        modelname="reptile"
-    else
-        modelname="reptile_$j"
+    if [ -d "output/custom_models" ]; then
+        rm -rf 'output/custom_models'
     fi
-    model_dir="/home/tham/Desktop/mimos/OpenPCDet/output/custom_models/pointrcnn_$modelname"
-    rm -r -v $model_dir
-  done
-  
+
+    # loop inner loop
+    all_model+='' # for reptile
+    for j in $(seq 1 $NUM_TASK)
+    do
+        echo -e "inner loop (task) $j"
+
+        # set training data
+        cd data/custom/ImageSets
+        mv "reptile_train_$j.txt" "train.txt"
+        cd ../../../
+
+        # Convert raw data OpenPCDet raw format for custom data -> some internal format
+        python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml
+        
+        # train
+        cd tools
+        python train.py --cfg_file cfgs/custom_models/pointpillar.yaml --batch_size 2 --workers 1 --epochs $EPOCHS --pretrained_model $PRETRAINED_MODEL
+        cd ../
+
+        # rename output directory
+        mv "output/custom_models/pointpillar" "output/custom_models/pointpillar_$j" 
+
+        # model to be reptile
+        all_model+=' '
+        all_model+="../output/custom_models/pointpillar_$j/default/ckpt/checkpoint_epoch_$EPOCHS.pth"
+
+        # reset training data
+        cd data/custom/ImageSets
+        mv "train.txt" "reptile_train_$j.txt"
+        cd ../../../
+    done
+
+    echo -e "###############################"
+    echo -e "Reptile now"
+    echo -e "###############################"
+    cd tools
+    python3 reptile.py --cfg_file cfgs/custom_models/pointpillar.yaml --ckpts $all_model --epoch_id $EPOCHS --pretrained_model $PRETRAINED_MODEL --epsilon $EPSILON
+    cd ../
+
+    PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
 done
