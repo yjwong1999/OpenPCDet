@@ -82,7 +82,12 @@ EPOCHS=10
 EPSILON=1.0
 OUTER_LOOP=100
 INNER_LOOP=$NUM_TASK
-PRETRAINED_PATH='../output/pretrained/pretrained_pointpillar.pth'
+PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
+
+# remove previous models, just in case 
+if [ -d "output/custom_models" ]; then
+    rm -rf 'output/custom_models'
+fi
 
 # loop outer loop
 for i in $(seq 1 $OUTER_LOOP)
@@ -90,10 +95,6 @@ do
     echo -e "###############################"
     echo -e "outer loop $i"
     echo -e "###############################"
-
-    if [ -d "output/custom_models" ]; then
-        rm -rf 'output/custom_models'
-    fi
 
     # loop inner loop
     all_model+='' # for reptile
@@ -135,4 +136,10 @@ do
     cd ../
 
     PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
+
+    # remove previous round task-specific models
+    for j in $(seq 1 $NUM_TASK)
+    do
+        rm -rf 'output/custom_models/pointpillar_$j'
+    done
 done
