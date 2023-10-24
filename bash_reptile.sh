@@ -70,7 +70,7 @@ fi
 ################################
 # create reptile data
 ################################
-python3 create_reptile_data.py --val-num 1 --upsample 10
+python3 create_reptile_data.py --val-num 20 --upsample 1
 
 
 ################################
@@ -78,9 +78,9 @@ python3 create_reptile_data.py --val-num 1 --upsample 10
 ################################
 NUM_TASK=4
 
-EPOCHS=10
+EPOCHS=1
 EPSILON=1.0
-OUTER_LOOP=100
+OUTER_LOOP=10
 INNER_LOOP=$NUM_TASK
 PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
 
