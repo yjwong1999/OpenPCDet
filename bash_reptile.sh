@@ -78,9 +78,9 @@ python3 create_reptile_data.py --val-num 20 --upsample 1
 ################################
 NUM_TASK=4
 
-EPOCHS=1
+EPOCHS=100
 EPSILON=1.0
-OUTER_LOOP=10
+OUTER_LOOP=5
 INNER_LOOP=$NUM_TASK
 PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
 
