@@ -72,7 +72,7 @@ def reptile(model, test_loader, args, eval_output_dir, logger, epoch_id, dist_te
 
     # save checkpoint
     save_checkpoint(
-        checkpoint_state(model, None, 99, None), filename='../output/custom_models/pointrcnn_pretrained/reptile',
+        checkpoint_state(model, None, 99, None), filename='../output/custom_models/reptile',
     )
 
 def main():
