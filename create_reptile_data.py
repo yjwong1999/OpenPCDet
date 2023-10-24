@@ -23,7 +23,7 @@ with open(val_txt) as f:
 '''
 # split filename based on defect type
 LEG_COUNTS = 13
-Z_THRESH_LOW = 13
+Z_THRESH_LOW = 14
 Z_THRESH_HIGH = 22
 
 custom_data_dir = 'data/custom/labels'
@@ -37,34 +37,39 @@ for filename in label_filenames:
     if True or 'augmented' not in filename:
         filename = os.path.join(custom_data_dir, filename)
 
+        with_fail = False
         with_down = False
         with_up = False
-        with_other = False
         with_missing = False
+        with_other = False
         count = 0
         with open(filename) as f:
             for line in f:
                 count+=1
                 if 'fail' in line:
+                    with_fail = True
                     z = float(line.split()[2])
                     if z >= Z_THRESH_HIGH:
                         with_up = True
-                    elif z <= Z_THRESH_LOW:
+                    if z <= Z_THRESH_LOW:
                         with_down = True
-                    else:
+                    if not with_up and not with_down:
                         with_other = True
-        with_missing = count != LEG_COUNTS
 
-        if with_down:
-            fail_1_filenames.append(filename)
-        elif with_up:
-            fail_2_filenames.append(filename)
-        elif with_other:
-            fail_3_filenames.append(filename)
-        elif with_missing:
-            fail_4_filenames.append(filename)
-        else:
+        with_missing = count != LEG_COUNTS
+        if with_missing:
+            with_fail = True
+
+        if not with_fail:                       # pass
             pass_filenames.append(filename)
+        elif with_other:                        # others
+            fail_1_filenames.append(filename)
+        elif with_down and not with_up:         # down
+            fail_2_filenames.append(filename)
+        elif not with_down and with_up:         # up
+            fail_3_filenames.append(filename)
+        else:                                   # missing
+            fail_4_filenames.append(filename)
 
 all_fail_filenames = [fail_1_filenames, fail_2_filenames, fail_3_filenames, fail_4_filenames]
 all_pass_filenames = copy.deepcopy(pass_filenames)
