@@ -12,7 +12,7 @@ try:
     shutil.rmtree('/output/custom_models/pointpillar')
 except:
     pass
-
+'''
 # read validation data
 val_txt = 'data/custom/ImageSets/val.txt'
 val_data = []
@@ -20,7 +20,7 @@ with open(val_txt) as f:
     for line in f:
         val_data.append(line.replace('\n', ''))
         #print(line.replace('\n', ''))
-
+'''
 # split filename based on defect type
 LEG_COUNTS = 13
 Z_THRESH_LOW = 13
@@ -34,7 +34,7 @@ fail_2_filenames = []
 fail_3_filenames = []
 fail_4_filenames = []
 for filename in label_filenames:
-    if 'augmented' not in filename:
+    if True or 'augmented' not in filename:
         filename = os.path.join(custom_data_dir, filename)
 
         with_down = False
@@ -78,19 +78,23 @@ val_filenames = []
 for task_idx in range(NUM_TASK):
     fail_filenames = all_fail_filenames[task_idx]
     for _ in range(VAL_N):
-        val_filenames.append(fail_filenames.pop(0))
+        try:
+            val_filenames.append(fail_filenames.pop(0))
+        except:
+            print(f'fail {task_idx}') #raise KeyboardInterrupt
 
 # take 20% of pass filenames as validation
+print(len(val_filenames))
 val_filenames += all_pass_filenames[:int(0.2*len(all_pass_filenames))]
 all_pass_filenames = all_pass_filenames[int(0.2*len(all_pass_filenames)):]
-
+print(len(val_filenames))
 
 # remove original ImageSets
 try:
     os.remove('data/custom/ImageSets/train.txt')
     os.remove('data/custom/ImageSets/val.txt')
 except:
-    pass
+    pass 
 
 # group the filenames into tasks
 chunck_len = int(len(all_pass_filenames) * (1 / NUM_TASK))
