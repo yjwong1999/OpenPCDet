@@ -119,7 +119,10 @@ for task_idx in range(NUM_TASK):
 
     # train filename
     with open(f'data/custom/ImageSets/reptile_train_{task_idx+1}.txt', 'w') as f:
-        train_filenames = pass_filenames + fail_filenames * UPSAMPLE
+        if len(pass_filenames) > len(fail_filenames):
+            train_filenames = pass_filenames + fail_filenames * UPSAMPLE
+        else:
+            train_filenames = pass_filenames + fail_filenames
         np.random.seed(0)
         np.random.shuffle(train_filenames)
         for fname in train_filenames:
