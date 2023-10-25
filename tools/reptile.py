@@ -2,7 +2,7 @@ import _init_path
 import argparse
 import datetime
 import glob
-import os
+import os, shutil
 import re
 import time
 from pathlib import Path
@@ -70,10 +70,15 @@ def reptile(model, test_loader, args, eval_output_dir, logger, epoch_id, dist_te
         result_dir=eval_output_dir
     )
 
+    if os.path.isfile('../output/reptile.pth'):
+        os.remove('../output/reptile.pth')
+
     # save checkpoint
     save_checkpoint(
-        checkpoint_state(model, None, 99, None), filename='../output/custom_models/reptile',
+        checkpoint_state(model, None, 99, None), filename='../output/reptile',
     )
+
+    shutil.rmtree('../output/custom_models')
 
 def main():
     args, cfg = parse_config()
