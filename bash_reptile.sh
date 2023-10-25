@@ -70,7 +70,7 @@ fi
 ################################
 # create reptile data
 ################################
-python3 create_reptile_data.py --val-num 20 --upsample 1
+python3 create_reptile_data.py --val-num 20 --upsample 6
 
 
 ################################
@@ -79,8 +79,8 @@ python3 create_reptile_data.py --val-num 20 --upsample 1
 NUM_TASK=4
 
 EPOCHS=100
-EPSILON=1.0
-OUTER_LOOP=5
+EPSILON=0.1
+OUTER_LOOP=2
 INNER_LOOP=$NUM_TASK
 PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
 
@@ -100,7 +100,7 @@ do
     all_model+='' # for reptile
     for j in $(seq 1 $NUM_TASK)
     do
-        echo -e "inner loop (task) $j"
+        echo -e "inner loop (task) $i.$j"
 
         # set training data
         cd data/custom/ImageSets
@@ -137,9 +137,4 @@ do
 
     PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
 
-    # remove previous round task-specific models
-    for j in $(seq 1 $NUM_TASK)
-    do
-        rm -rf 'output/custom_models/pointpillar_$j'
-    done
 done
