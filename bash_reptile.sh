@@ -129,12 +129,11 @@ do
     done
 
     echo -e "###############################"
-    echo -e "Reptile now"
+    echo -e "Reptile for outer loop $i"
     echo -e "###############################"
     cd tools
     python3 reptile.py --cfg_file cfgs/custom_models/pointpillar.yaml --ckpts $all_model --epoch_id $EPOCHS --pretrained_model $PRETRAINED_MODEL --epsilon $EPSILON
     cd ../
 
     PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
-
 done
