@@ -26,10 +26,20 @@ NAME="custom"
 LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
 PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 
-#CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
-CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
-#CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+MODEL='pointpillar'
+EPOCH=100
+BS=4
 
+if [ $MODEL == "pointpillar" ]; then
+    CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
+elif [ $MODEL == "pointrcnn" ]; then
+    CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
+elif [ $MODEL == "pv_rcnn" ]: then
+    CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+else
+    echo "model type not implemented, please check in hyperparameters"
+    exit 1
+fi
 
 ################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
@@ -40,14 +50,6 @@ python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 ################################
 # Convert raw data + labelCloud format -> OpenPCDet raw format for custom data 
 ################################
-'''
-if [ -d "data/custom" ]; then
-    echo -e "custom data has been created previously."
-else
-    python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE
-fi
-echo ""
-'''
 if [ -d "data/custom" ]; then
     rm -r "data/custom"
 fi
@@ -65,9 +67,7 @@ python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/da
 ################################
 # pointrcnn
 cd tools
-#python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 2 --workers 1 --epochs 300 #--pretrained_model ../output/pretrained_models/pretrained_pointrcnn.pth
-python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 4 --workers 1 --epochs 100
-#python train.py --cfg_file ${CFG_FILE:6:1000}  --batch_size 3 --workers 1 --epochs 100
+python train.py --cfg_file ${CFG_FILE:6:1000} --epochs $EPOCH --batch_size $BS --workers 1  #--pretrained_model ../output/pretrained_models/pretrained_pointrcnn.pth
 
 ################################
 # deactivate conda environment
