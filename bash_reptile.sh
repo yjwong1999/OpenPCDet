@@ -79,8 +79,8 @@ python3 create_reptile_data.py --val-num 20 --upsample 6
 NUM_TASK=4
 
 EPOCHS=100
-EPSILON=0.1
-OUTER_LOOP=2
+EPSILON=0.01 #0.055555555
+OUTER_LOOP=1
 INNER_LOOP=$NUM_TASK
 PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
 
@@ -97,7 +97,7 @@ do
     echo -e "###############################"
 
     # loop inner loop
-    all_model+='' # for reptile
+    all_model='' # for reptile
     for j in $(seq 1 $NUM_TASK)
     do
         echo -e "inner loop (task) $i.$j"
@@ -129,11 +129,12 @@ do
     done
 
     echo -e "###############################"
-    echo -e "Reptile for outer loop $i"
+    echo -e "Reptile now"
     echo -e "###############################"
     cd tools
     python3 reptile.py --cfg_file cfgs/custom_models/pointpillar.yaml --ckpts $all_model --epoch_id $EPOCHS --pretrained_model $PRETRAINED_MODEL --epsilon $EPSILON
     cd ../
 
     PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
+
 done
