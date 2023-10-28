@@ -34,7 +34,7 @@ if [ $MODEL == "pointpillar" ]; then
     CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
 elif [ $MODEL == "pointrcnn" ]; then
     CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
-elif [ $MODEL == "pv_rcnn" ]: then
+elif [ $MODEL == "pv_rcnn" ]; then
     CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
 else
     echo "model type not implemented, please check in hyperparameters"
