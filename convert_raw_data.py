@@ -40,9 +40,9 @@ def convert_ply(input_path, output_path):
     except:
         pass
     # x 100
-    data_pd['x'] = data_pd['x'].map(lambda x: x * magnify_factor)
-    data_pd['y'] = data_pd['y'].map(lambda x: x * magnify_factor)
-    data_pd['z'] = data_pd['z'].map(lambda x: x * magnify_factor)
+    data_pd['x'] = data_pd['x'].map(lambda x: x * pc_mf)
+    data_pd['y'] = data_pd['y'].map(lambda x: x * pc_mf)
+    data_pd['z'] = data_pd['z'].map(lambda x: x * pc_mf)
     # record point cloud range
     global point_cloud_ranges
     point_cloud_ranges[0].append(data_pd['x'].min())
@@ -91,13 +91,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--name', type = str, required = False, default = 'custom', help="where is the directory for the labels")
 parser.add_argument('--dir', type = str, required = True, help="where is the directory for the labels")
 parser.add_argument('--cfg_file', type=str, default=None, required = True, help='specify the config for training')
+parser.add_argument('--pc_mf', type=int, default=1, required = True, help='the magnify factor to magnify point clouds')
+parser.add_argument('--dxdy_mf', type=int, default=1, required = True, help='the magnify factor to magnify label in dx dy dimension')
 args = parser.parse_args()
 
 # global variable
 point_cloud_ranges = [[],[],[],[],[],[]]
-magnify_factor = 20
-voxel_size_x, voxel_size_y, voxel_size_z = 0.2, 0.2, 0.15 # default
-multiplier_x, multiplier_y, multiplier_z = 16, 16, 16
+pc_mf = args.pc_mf                                          # point cloud magnifying factor
+dxdy_mf = args.dxdy_mf                                      # magnify factor for dx dy in label dimension
+voxel_size_x, voxel_size_y, voxel_size_z = 0.2, 0.2, 0.15   # default
+multiplier_x, multiplier_y, multiplier_z = 16, 16, 16       # requirement for condition 1/2 of openpcdet
 z_range = 40
 
 # read cfg file
@@ -109,12 +112,9 @@ model_name = cfg['MODEL']['NAME']
 data_cfg_file = cfg['DATA_CONFIG']['_BASE_CONFIG_']
 data_cfg_file = os.path.join('tools', data_cfg_file)
 data_cfg = read_cfg_file(data_cfg_file) # read data cfg file
-'''
-# voxel size
-voxel_sizes = data_cfg['DATA_PROCESSOR'][2]['VOXEL_SIZE']
-print(voxel_sizes)
-voxel_size_x, voxel_size_y, voxel_size_z = voxel_sizes
-'''
+
+
+
 ###########################################################
 # prepare the direcotry for new custom data
 ###########################################################
@@ -189,8 +189,12 @@ while True:
             if category_name == 'fail':
                 with_fail = True
             temp = [x, y, z, dx, dy, dz, yaw, category_name]
-            temp = [x * magnify_factor, y * magnify_factor, z * magnify_factor, \
-                    dx * magnify_factor, dy  * magnify_factor, dz * magnify_factor, \
+            temp = [x * pc_mf, \
+                    y * pc_mf, \
+                    z * pc_mf, \
+                    dx * pc_mf * dxdy_mf, \
+                    dy  * pc_mf * dxdy_mf, \
+                    dz * pc_mf, \
                     yaw, category_name]
             annotation = ''
             for i in temp:
@@ -335,8 +339,8 @@ while True:
             voxel_size_x = np.around(voxel_size_x, decimals=2)
 
             # decrease magnifying factor
-            magnify_factor -= 1
-            if magnify_factor <=1: magnify_factor = 1
+            pc_mf -= 1
+            if pc_mf <=1: pc_mf = 1
 
             # restart point_cloud_ranges
             point_cloud_ranges = [ [], [], [], [], [], [] ]
