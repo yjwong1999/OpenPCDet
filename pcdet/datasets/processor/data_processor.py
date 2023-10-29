@@ -2,7 +2,8 @@ from functools import partial
 
 import numpy as np
 from skimage import transform
-
+import torch
+import torchvision
 from ...utils import box_utils, common_utils
 
 tv = None
@@ -194,27 +195,18 @@ class DataProcessor(object):
             near_idxs = np.where(pts_near_flag == 1)[0]
             choice = []
             if num_points > len(far_idxs_choice):
-                try:
-                    near_idxs_choice = np.random.choice(near_idxs, num_points - len(far_idxs_choice), replace=False)
-                except:
-                    near_idxs_choice = np.random.choice(near_idxs, num_points - len(far_idxs_choice), replace=True)
+                near_idxs_choice = np.random.choice(near_idxs, num_points - len(far_idxs_choice), replace=False)
                 choice = np.concatenate((near_idxs_choice, far_idxs_choice), axis=0) \
                     if len(far_idxs_choice) > 0 else near_idxs_choice
             else: 
                 choice = np.arange(0, len(points), dtype=np.int32)
-                try:
-                    choice = np.random.choice(choice, num_points, replace=False)
-                except:
-                    choice = np.random.choice(choice, num_points, replace=True)
+                choice = np.random.choice(choice, num_points, replace=False)
             np.random.shuffle(choice)
         else:
             choice = np.arange(0, len(points), dtype=np.int32)
             if num_points > len(points):
-                try:
-                    extra_choice = np.random.choice(choice, num_points - len(points), replace=False)
-                    choice = np.concatenate((choice, extra_choice), axis=0)
-                except:
-                    pass
+                extra_choice = np.random.choice(choice, num_points - len(points), replace=False)
+                choice = np.concatenate((choice, extra_choice), axis=0)
             np.random.shuffle(choice)
         data_dict['points'] = points[choice]
         return data_dict
@@ -236,6 +228,56 @@ class DataProcessor(object):
             image=data_dict['depth_maps'],
             factors=(self.depth_downsample_factor, self.depth_downsample_factor)
         )
+        return data_dict
+    
+    def image_normalize(self, data_dict=None, config=None):
+        if data_dict is None:
+            return partial(self.image_normalize, config=config)
+        mean = config.mean
+        std = config.std
+        compose = torchvision.transforms.Compose(
+            [
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize(mean=mean, std=std),
+            ]
+        )
+        data_dict["camera_imgs"] = [compose(img) for img in data_dict["camera_imgs"]]
+        return data_dict
+    
+    def image_calibrate(self,data_dict=None, config=None):
+        if data_dict is None:
+            return partial(self.image_calibrate, config=config)
+        img_process_infos = data_dict['img_process_infos']
+        transforms = []
+        for img_process_info in img_process_infos:
+            resize, crop, flip, rotate = img_process_info
+
+            rotation = torch.eye(2)
+            translation = torch.zeros(2)
+            # post-homography transformation
+            rotation *= resize
+            translation -= torch.Tensor(crop[:2])
+            if flip:
+                A = torch.Tensor([[-1, 0], [0, 1]])
+                b = torch.Tensor([crop[2] - crop[0], 0])
+                rotation = A.matmul(rotation)
+                translation = A.matmul(translation) + b
+            theta = rotate / 180 * np.pi
+            A = torch.Tensor(
+                [
+                    [np.cos(theta), np.sin(theta)],
+                    [-np.sin(theta), np.cos(theta)],
+                ]
+            )
+            b = torch.Tensor([crop[2] - crop[0], crop[3] - crop[1]]) / 2
+            b = A.matmul(-b) + b
+            rotation = A.matmul(rotation)
+            translation = A.matmul(translation) + b
+            transform = torch.eye(4)
+            transform[:2, :2] = rotation
+            transform[:2, 3] = translation
+            transforms.append(transform.numpy())
+        data_dict["img_aug_matrix"] = transforms
         return data_dict
 
     def forward(self, data_dict):
