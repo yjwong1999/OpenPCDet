@@ -44,6 +44,17 @@ else
     exit 1
 fi
 
+
+################################
+# remove previous models, just in case 
+################################
+if [ -d output/custom_models/$MODEL ]; then
+    echo -e "Directory 'output/custom_models/$MODEL' exist!"
+    echo -e "Please rename or delete the directory, because the bash_train.sh is training a new $MODEL."
+    exit 1
+fi
+
+
 ################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
