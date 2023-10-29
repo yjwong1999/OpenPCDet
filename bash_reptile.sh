@@ -57,7 +57,7 @@ fi
 ################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
-python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
 
 
 ################################
@@ -66,7 +66,7 @@ python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 if [ -d "data/custom" ]; then
     rm -r "data/custom"
 fi
-python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF
+python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF || exit 1
 echo ""
 
 
@@ -93,7 +93,7 @@ fi
 ################################
 # create reptile data
 ################################
-python3 create_reptile_data.py --val-num 20 --upsample 6
+python3 create_reptile_data.py --val-num 20 --upsample 6 || exit 1
 
 
 ################################
@@ -102,7 +102,7 @@ python3 create_reptile_data.py --val-num 20 --upsample 6
 
 # remove previous models, just in case 
 if [ -d "output/custom_models" ]; then
-    rm -rf 'output/custom_models'
+    rm -rf 'output/custom_models' || exit 1
 fi
 
 # loop outer loop
@@ -124,11 +124,11 @@ do
         cd ../../../
 
         # Convert raw data OpenPCDet raw format for custom data -> some internal format
-        python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml
+        python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml || exit 1
         
         # train
         cd tools
-        python train.py --cfg_file cfgs/custom_models/pointpillar.yaml --batch_size $BS --workers 1 --epochs $EPOCHS --pretrained_model $PRETRAINED_MODEL
+        python train.py --cfg_file cfgs/custom_models/pointpillar.yaml --batch_size $BS --workers 1 --epochs $EPOCHS --pretrained_model $PRETRAINED_MODEL || exit 1
         cd ../
 
         # rename output directory
@@ -148,7 +148,7 @@ do
     echo -e "Reptile now"
     echo -e "###############################"
     cd tools
-    python3 reptile.py --cfg_file cfgs/custom_models/pointpillar.yaml --ckpts $all_model --epoch_id $EPOCHS --pretrained_model $PRETRAINED_MODEL --epsilon $EPSILON
+    python3 reptile.py --cfg_file cfgs/custom_models/pointpillar.yaml --ckpts $all_model --epoch_id $EPOCHS --pretrained_model $PRETRAINED_MODEL --epsilon $EPSILON || exit 1
     cd ../
 
     PRETRAINED_PATH='../output/custom_models/reptile.pth' # after reptile, we have the first reptile model
