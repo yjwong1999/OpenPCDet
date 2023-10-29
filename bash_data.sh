@@ -47,39 +47,39 @@ else
     ################################
     # download ply file
     ################################
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46" -O "techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt
-    unzip "techpartnerfile-ply.zip" -d "techpartnerfile"
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1-p9g4AVO9fxhwYtI-Ab3Se1Mbw7_gW46" -O "techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt || exit 1
+    unzip "techpartnerfile-ply.zip" -d "techpartnerfile" || exit 1
 
     ################################
     # download labels
     ################################
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt
-    unzip "techpartnerfile_label.zip" -d "techpartnerfile"
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=14pAHVEho2CAXkcPxmzuEJP3CvI6AwExH" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt || exit 1
+    unzip "techpartnerfile_label.zip" -d "techpartnerfile" || exit 1
     cd ../
     echo " "
 
     ################################
     # batch preprocessing of data
     ################################
-    python3 batch_preprocess.py --input-dir $ORI_PLY_DIR --output-dir $PLY_DIR
+    python3 batch_preprocess.py --input-dir $ORI_PLY_DIR --output-dir $PLY_DIR || exit 1
     
     
     ################################
     # split the data (if necessary)
     ################################
-    python3 batch_split.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+    python3 batch_split.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
     
     
     ################################
     # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
     ################################
-    python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+    python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
 
 
     ################################
     # Augmentation
     ################################
-    python3 batch_augment.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+    python3 batch_augment.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
 fi
 
 ################################
