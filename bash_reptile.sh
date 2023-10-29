@@ -4,8 +4,10 @@
 # README
 # This .sh file is to:
 # 1. Convert raw data + labelCloud format -> OpenPCDet raw format for custom data
-# 2. Convert OpenPCDet raw format to KITTI
-# 3. Train the model via reptile
+# 2. Reptile
+#    3.1 Create reptile data
+#    3.2 Convert reptile data from OpenPCDet raw format to KITTI
+#    3.3 Train the model via reptile
 ################################
 
 
@@ -35,7 +37,7 @@ OUTER_LOOP=1                  # outer loop
 INNER_LOOP=$NUM_TASK          # inner loop = number of tasks
 
 PC_MF=20                      # magnifying factor (MF) to scale up point clouds
-DXDY_MF="0.85"                # magnifying factor (MF) to scale down dx dy dimension of labels
+DXDY_MF=0.85                  # magnifying factor (MF) to scale down dx dy dimension of labels
 
 if [ $MODEL == "pointpillar" ]; then
     CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
@@ -126,7 +128,7 @@ do
         
         # train
         cd tools
-        python train.py --cfg_file cfgs/custom_models/pointpillar.yaml --batch_size 2 --workers 1 --epochs $EPOCHS --pretrained_model $PRETRAINED_MODEL
+        python train.py --cfg_file cfgs/custom_models/pointpillar.yaml --batch_size $BS --workers 1 --epochs $EPOCHS --pretrained_model $PRETRAINED_MODEL
         cd ../
 
         # rename output directory
