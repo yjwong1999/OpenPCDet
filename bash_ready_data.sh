@@ -46,11 +46,11 @@ else
     cd "data_raw"
     echo -e "The client data zip file does not exists. Downloading now...\n"
     # download ply file
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT" -O "preprocessed_techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt
-    unzip "preprocessed_techpartnerfile-ply.zip" -d "techpartnerfile"
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1PEhDVrk0rn1fxMpa_M6TVRzCeG0_x4pT" -O "preprocessed_techpartnerfile-ply.zip" && rm -rf /tmp/cookies.txt || exit 1
+    unzip "preprocessed_techpartnerfile-ply.zip" -d "techpartnerfile" || exit 1
     # download labels
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt
-    unzip "techpartnerfile_label.zip" -d "techpartnerfile"
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=16SNV_o23LslyjRdM1uoqX7vzt1MsrvI3" -O "techpartnerfile_label.zip" && rm -rf /tmp/cookies.txt || exit 1
+    unzip "techpartnerfile_label.zip" -d "techpartnerfile" || exit 1
     cd ../
     echo " "
 fi
@@ -58,7 +58,7 @@ fi
 ################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
-python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
 
 
 ################################
