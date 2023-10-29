@@ -22,13 +22,34 @@ conda activate openpcdet
 ################################
 # hyperparameters
 ################################
+MODEL='pointpillar'
 NAME="custom"
 LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
 PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 
-#CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
-CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
-#CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+NUM_TASK=4                    # predefined reptile tasks
+EPOCHS=100                    # training epochs
+BS=4                          # batch size
+EPSILON=0.01                  # outer learning rate of reptile
+OUTER_LOOP=1                  # outer loop
+INNER_LOOP=$NUM_TASK          # inner loop = number of tasks
+
+PC_MF=20                      # magnifying factor (MF) to scale up point clouds
+DXDY_MF="0.85"                # magnifying factor (MF) to scale down dx dy dimension of labels
+
+if [ $MODEL == "pointpillar" ]; then
+    CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
+    PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
+elif [ $MODEL == "pointrcnn" ]; then
+    CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
+    PRETRAINED_MODEL='../output/pretrained/pretrained_pointrcnn.pth'
+elif [ $MODEL == "pv_rcnn" ]; then
+    CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+    PRETRAINED_MODEL='../output/pretrained/pretrained_pv_rcnn.pth'
+else
+    echo "model type not implemented, please check in hyperparameters"
+    exit 1
+fi
 
 
 ################################
@@ -43,7 +64,7 @@ python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 if [ -d "data/custom" ]; then
     rm -r "data/custom"
 fi
-python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE
+python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF
 echo ""
 
 
@@ -61,7 +82,7 @@ else
     mkdir 'output/pretrained'
     cd output/pretrained
     wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1wMxWTpU1qUoY3DsCH31WJmvJxcjFXKlm' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1wMxWTpU1qUoY3DsCH31WJmvJxcjFXKlm" -O "pretrained_pointpillar.pth" && rm -rf /tmp/cookies.txt
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-" -O "pretrained_pvrcnn.pth" && rm -rf /tmp/cookies.txt
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lIOq4Hxr0W3qsX83ilQv0nk1Cls6KAr-" -O "pretrained_pv_rcnn.pth" && rm -rf /tmp/cookies.txt
     wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1BCX9wMn-GYAfSOPpyxf6Iv6fc0qKLSiU' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1BCX9wMn-GYAfSOPpyxf6Iv6fc0qKLSiU" -O "pretrained_pointrcnn.pth" && rm -rf /tmp/cookies.txt
     cd ../../
 fi
@@ -76,13 +97,6 @@ python3 create_reptile_data.py --val-num 20 --upsample 6
 ################################
 # reptile
 ################################
-NUM_TASK=4
-
-EPOCHS=100
-EPSILON=0.01 #0.055555555
-OUTER_LOOP=1
-INNER_LOOP=$NUM_TASK
-PRETRAINED_MODEL='../output/pretrained/pretrained_pointpillar.pth'
 
 # remove previous models, just in case 
 if [ -d "output/custom_models" ]; then
