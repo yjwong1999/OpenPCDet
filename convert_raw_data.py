@@ -91,8 +91,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--name', type = str, required = False, default = 'custom', help="where is the directory for the labels")
 parser.add_argument('--dir', type = str, required = True, help="where is the directory for the labels")
 parser.add_argument('--cfg_file', type=str, default=None, required = True, help='specify the config for training')
-parser.add_argument('--pc_mf', type=int, default=1, required = True, help='the magnify factor to magnify point clouds')
-parser.add_argument('--dxdy_mf', type=int, default=1, required = True, help='the magnify factor to magnify label in dx dy dimension')
+parser.add_argument('--pc_mf', type=float, default=1, required = True, help='the magnify factor to magnify point clouds')
+parser.add_argument('--dxdy_mf', type=float, default=1, required = True, help='the magnify factor to magnify label in dx dy dimension')
 args = parser.parse_args()
 
 # global variable
