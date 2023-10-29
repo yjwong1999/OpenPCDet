@@ -19,22 +19,33 @@ conda activate openpcdet
 ################################
 # hyperparameters
 ################################
+MODEL='pointpillar'
 NAME="custom"
 LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
 PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 
-#CFG_FILE='tools/cfgs/custom_models/pointrcnn.yaml'
-CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
-#CFG_FILE='tools/cfgs/custom_models/pv_rcnn.yaml'
+EPOCH=100
 
+if [ $MODEL == "pointpillar" ]; then
+    CFG_FILE='../output/custom_models/pointpillar/default/pointpillar.yaml'
+elif [ $MODEL == "pointrcnn" ]; then
+    CFG_FILE='../output/custom_models/pointpillar/default/pointrcnn.yaml'
+elif [ $MODEL == "pv_rcnn" ]; then
+    CFG_FILE='../output/custom_models/pointpillar/default/pv_rcnn.yaml'
+else
+    echo "model type not implemented, please check in hyperparameters"
+    exit 1
+fi
 
 ################################
 # Run demo.py
 ################################
 cd tools
 
-python demo.py --cfg_file ../output/custom_models/pointpillar/default/pointpillar.yaml --ckpt ../output/custom_models/pointpillar/default/ckpt/checkpoint_epoch_100.pth --data_path "../data/custom/points" --ext .npy
+# loop through all point clouds
+python demo.py --cfg_file $CFG_FILE --ckpt ../output/custom_models/$MODEL/default/ckpt/checkpoint_epoch_$EPOCH.pth --data_path "../data/custom/points" --ext .npy
 
-# "../data/custom/points/RF 010_R0C20_F_Snap3D_part1.npy"
+# loop through specific point clouds
+# python demo.py --cfg_file $CFG_FILE --ckpt ../output/custom_models/$MODEL/default/ckpt/checkpoint_epoch_$EPOCH.pth --data_path "../data/custom/points/RF 010_R0C20_F_Snap3D_part1.npy" --ext .npy
 
 cd ../
