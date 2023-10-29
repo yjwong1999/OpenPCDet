@@ -47,7 +47,7 @@ fi
 ################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
-python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
+python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
 
 
 ################################
@@ -56,13 +56,13 @@ python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 if [ -d "data/custom" ]; then
     rm -r "data/custom"
 fi
-python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF
+python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF  || exit 1
 echo ""
 
 ################################
 # Convert raw data OpenPCDet raw format for custom data -> some internal format
 ################################
-python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml
+python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/dataset_configs/custom_dataset.yaml || exit 1
 
 
 ################################
@@ -70,7 +70,7 @@ python -m pcdet.datasets.custom.custom_dataset create_custom_infos tools/cfgs/da
 ################################
 # pointrcnn
 cd tools
-python train.py --cfg_file ${CFG_FILE:6:1000} --epochs $EPOCH --batch_size $BS --workers 1  #--pretrained_model ../output/pretrained_models/pretrained_pointrcnn.pth
+python train.py --cfg_file ${CFG_FILE:6:1000} --epochs $EPOCH --batch_size $BS --workers 1 || exit 1
 
 ################################
 # deactivate conda environment
