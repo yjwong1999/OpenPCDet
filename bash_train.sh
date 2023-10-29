@@ -22,15 +22,16 @@ conda activate openpcdet
 ################################
 # hyperparameters
 ################################
+MODEL='pointpillar'
 NAME="custom"
 LABEL_DIR="data_raw/techpartnerfile/techpartnerfile_label"
 PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 
-MODEL='pointpillar'
 EPOCH=100
 BS=4
+
 PC_MF=20           # magnifying factor (MF) to scale up point clouds
-DXDY_MF="0.85"     # magnifying factor (MF) to scale down dx dy dimension of labels
+DXDY_MF=0.85       # magnifying factor (MF) to scale down dx dy dimension of labels
 
 if [ $MODEL == "pointpillar" ]; then
     CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
