@@ -62,23 +62,23 @@ MODEL:
         ANCHOR_GENERATOR_CONFIG: [
             {
                 'class_name': 'pass',
-                'anchor_sizes': [[3.9, 1.6, 1.56]],
-                'anchor_rotations': [0, 0.01],
-                'anchor_bottom_heights': [-1.78],
+                'anchor_sizes': [[0.8, 0.6, 1.73]],
+                'anchor_rotations': [0, 1.57],
+                'anchor_bottom_heights': [-0.6],
                 'align_center': False,
                 'feature_map_stride': 2,
-                'matched_threshold': 0.01,
-                'unmatched_threshold': 0.005
+                'matched_threshold': 0.5,
+                'unmatched_threshold': 0.35
             },
             {
                 'class_name': 'fail',
                 'anchor_sizes': [[0.8, 0.6, 1.73]],
-                'anchor_rotations': [0, 0.01],
+                'anchor_rotations': [0, 1.57],
                 'anchor_bottom_heights': [-0.6],
                 'align_center': False,
                 'feature_map_stride': 2,
-                'matched_threshold': 0.01,
-                'unmatched_threshold': 0.005
+                'matched_threshold': 0.5,
+                'unmatched_threshold': 0.35
             }
         ]
 
