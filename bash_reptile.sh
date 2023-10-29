@@ -55,6 +55,16 @@ fi
 
 
 ################################
+# remove previous models, just in case 
+################################
+if [ -d "output/custom_models" ]; then
+    echo -e "Directory 'output/custom_models' exist!"
+    echo -e "Please rename or delete the directory, because the bash_reptile.sh need to occupy this folder."
+    exit 1
+fi
+
+
+################################
 # Fix the label path name in the json label, in case multiple people did the labelling -> insonsistency in root directory
 ################################
 python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR || exit 1
@@ -99,11 +109,6 @@ python3 create_reptile_data.py --val-num 20 --upsample 6 || exit 1
 ################################
 # reptile
 ################################
-
-# remove previous models, just in case 
-if [ -d "output/custom_models" ]; then
-    rm -rf 'output/custom_models' || exit 1
-fi
 
 # loop outer loop
 for i in $(seq 1 $OUTER_LOOP)
