@@ -29,6 +29,8 @@ PLY_DIR="data_raw/techpartnerfile/preprocessed_techpartnerfile-ply"
 MODEL='pointpillar'
 EPOCH=100
 BS=4
+PC_MF=20           # magnifying factor (MF) to scale up point clouds
+DXDY_MF="0.85"     # magnifying factor (MF) to scale down dx dy dimension of labels
 
 if [ $MODEL == "pointpillar" ]; then
     CFG_FILE='tools/cfgs/custom_models/pointpillar.yaml'
@@ -53,7 +55,7 @@ python3 batch_fix_label.py --ply_dir $PLY_DIR --label_dir $LABEL_DIR
 if [ -d "data/custom" ]; then
     rm -r "data/custom"
 fi
-python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE
+python convert_raw_data.py --name $NAME --dir $LABEL_DIR --cfg_file $CFG_FILE --pc_mf $PC_MF --dxdy_mf $DXDY_MF
 echo ""
 
 ################################
