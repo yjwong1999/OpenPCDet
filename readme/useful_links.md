@@ -11,5 +11,8 @@ https://github.com/open-mmlab/OpenPCDet/issues/1446
 https://github.com/open-mmlab/OpenPCDet/issues/432
 
 ### How to try catch
-https://stackoverflow.com/a/22010339 (i use this mainly)
+https://stackoverflow.com/a/22010339 (i use this mainly) </br>
 https://stackoverflow.com/a/50265513
+
+### When to use PointHead-based 3D detector
+https://github.com/open-mmlab/OpenPCDet/issues/646#issuecomment-1046924165
